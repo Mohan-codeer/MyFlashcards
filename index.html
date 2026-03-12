@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class 7 Flashcards</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0c;
+    --surface: #111115;
+    --surface2: #18181e;
+    --border: #2a2a35;
+    --border-glow: #3a3a50;
+    --text: #e8e8f0;
+    --text-dim: #7a7a9a;
+    --text-faint: #3a3a55;
+
+    --bio: #2dff8f;
+    --bio-dim: #0a3d22;
+    --bio-glow: rgba(45, 255, 143, 0.12);
+
+    --chem: #ff6b35;
+    --chem-dim: #3d1a0a;
+    --chem-glow: rgba(255, 107, 53, 0.12);
+
+    --phy: #4da6ff;
+    --phy-dim: #0a2040;
+    --phy-glow: rgba(77, 166, 255, 0.12);
+
+    --accent: var(--bio);
+    --accent-dim: var(--bio-dim);
+    --accent-glow: var(--bio-glow);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .header-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .header h1 span {
+    font-style: italic;
+    color: var(--accent);
+    transition: color 0.4s ease;
+  }
+
+  .header-sub {
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--text-dim);
+    font-weight: 300;
+    letter-spacing: 0.01em;
+  }
+
+  /* Subject tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 7px;
+    transition: all 0.25s ease;
+    position: relative;
+  }
+
+  .tab:hover { color: var(--text); }
+
+  .tab.active {
+    background: var(--accent-dim);
+    color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .tab[data-subject="bio"].active  { --accent: var(--bio);  --accent-dim: var(--bio-dim);  --accent-glow: var(--bio-glow); }
+  .tab[data-subject="chem"].active { --accent: var(--chem); --accent-dim: var(--chem-dim); --accent-glow: var(--chem-glow); }
+  .tab[data-subject="phy"].active  { --accent: var(--phy);  --accent-dim: var(--phy-dim);  --accent-glow: var(--phy-glow); }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 32px;
+    overflow: hidden;
+    animation: fadeUp 0.6s 0.15s ease both;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease, background 0.4s ease;
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    animation: fadeUp 0.6s 0.15s ease both;
+  }
+
+  .progress-text span {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+  }
+
+  .progress-text .card-num {
+    color: var(--accent);
+    transition: color 0.4s ease;
+  }
+
+  /* Card stage */
+  .card-stage {
+    perspective: 1200px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+    cursor: pointer;
+  }
+
+  .card-inner.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+    overflow: hidden;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .card-face:hover {
+    border-color: var(--border-glow);
+  }
+
+  .card-face::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, var(--accent-glow) 0%, transparent 65%);
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .card-back {
+    transform: rotateY(180deg);
+  }
+
+  .card-back::before {
+    background: radial-gradient(ellipse at 50% 100%, var(--accent-glow) 0%, transparent 65%);
+  }
+
+  .card-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-bottom: 24px;
+    transition: color 0.4s ease, background 0.4s ease;
+  }
+
+  .card-question {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(18px, 3vw, 24px);
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .card-answer {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    font-weight: 300;
+    max-width: 520px;
+  }
+
+  .card-answer strong {
+    color: var(--accent);
+    font-weight: 500;
+    transition: color 0.4s ease;
+  }
+
+  .flip-hint {
+    position: absolute;
+    bottom: 18px;
+    right: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    animation: fadeUp 0.6s 0.25s ease both;
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn:hover {
+    border-color: var(--border-glow);
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .btn-flip {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+    box-shadow: 0 0 16px var(--accent-glow);
+    transition: all 0.2s ease, border-color 0.4s ease, color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .btn-flip:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+  }
+
+  .score-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text-faint);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 8px;
+  }
+
+  .score-badge span {
+    color: var(--accent);
+    font-weight: 500;
+    transition: color 0.4s ease;
+  }
+
+  /* Mark buttons */
+  .mark-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    justify-content: center;
+    animation: fadeUp 0.6s 0.3s ease both;
+    min-height: 42px;
+  }
+
+  .btn-mark {
+    padding: 8px 18px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-mark.correct {
+    color: var(--bio);
+    border-color: var(--bio-dim);
+  }
+
+  .btn-mark.correct:hover {
+    background: var(--bio-dim);
+    box-shadow: 0 0 12px var(--bio-glow);
+  }
+
+  .btn-mark.wrong {
+    color: var(--chem);
+    border-color: var(--chem-dim);
+  }
+
+  .btn-mark.wrong:hover {
+    background: var(--chem-dim);
+    box-shadow: 0 0 12px var(--chem-glow);
+  }
+
+  /* Completion screen */
+  .completion {
+    display: none;
+    text-align: center;
+    padding: 60px 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .completion.visible { display: block; }
+
+  .completion-score {
+    font-family: 'DM Serif Display', serif;
+    font-size: 72px;
+    line-height: 1;
+    color: var(--accent);
+    margin-bottom: 8px;
+    transition: color 0.4s ease;
+    text-shadow: 0 0 40px var(--accent-glow);
+  }
+
+  .completion-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 24px;
+  }
+
+  .completion-msg {
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-bottom: 32px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .btn-restart {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: 9px;
+    border: 1px solid var(--accent);
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  .btn-restart:hover { opacity: 0.8; transform: translateY(-1px); }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(24px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .card-anim { animation: slideIn 0.35s ease both; }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .card-face { padding: 28px 20px; }
+    .card-inner { height: 280px; }
+    .controls { flex-wrap: wrap; }
+    .score-badge { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="header">
+    <p class="header-label">Class 7 / Study Aid</p>
+    <h1>Science <span id="header-subject">Flashcards</span></h1>
+    <p class="header-sub">Click a card to reveal the answer. Mark your result to track progress.</p>
+  </header>
+
+  <!-- Subject Tabs -->
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-subject="bio" onclick="switchSubject('bio')">Biology</button>
+    <button class="tab"        data-subject="chem" onclick="switchSubject('chem')">Chemistry</button>
+    <button class="tab"        data-subject="phy"  onclick="switchSubject('phy')">Physics</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-text">
+    <span class="card-num" id="card-num">01 / 10</span>
+    <span id="score-text">Score: 0</span>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progress-bar" style="width:10%"></div>
+  </div>
+
+  <!-- Flashcard -->
+  <div class="card-stage" id="card-stage">
+    <div class="card-inner" id="card-inner" onclick="flipCard()">
+      <div class="card-face card-front">
+        <div class="card-tag" id="card-tag-front">Biology</div>
+        <p class="card-question" id="card-question">Loading...</p>
+        <span class="flip-hint">Tap to reveal</span>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-tag" id="card-tag-back">Answer</div>
+        <p class="card-answer" id="card-answer">Loading...</p>
+        <span class="flip-hint">Tap to flip back</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mark controls (shown after flip) -->
+  <div class="mark-controls" id="mark-controls" style="display:none;">
+    <button class="btn-mark correct" onclick="markCard(true)">Correct</button>
+    <button class="btn-mark wrong"   onclick="markCard(false)">Missed It</button>
+  </div>
+
+  <!-- Nav Controls -->
+  <div class="controls">
+    <button class="btn" id="btn-prev" onclick="navigate(-1)" disabled>Prev</button>
+    <button class="btn btn-flip" onclick="flipCard()">Flip Card</button>
+    <div class="score-badge">Correct: <span id="correct-count">0</span> / <span id="total-count">10</span></div>
+    <button class="btn" id="btn-next" onclick="navigate(1)">Next</button>
+  </div>
+
+  <!-- Completion -->
+  <div class="completion" id="completion">
+    <div class="completion-score" id="final-score">0%</div>
+    <div class="completion-label">Session Complete</div>
+    <p class="completion-msg" id="final-msg">Keep revising and you will get there.</p>
+    <button class="btn-restart" onclick="restart()">Restart Deck</button>
+  </div>
+
+</div>
+
+<script>
+const data = {
+  bio: {
+    label: "Biology",
+    color: "bio",
+    cards: [
+      { q: "What is the basic unit of life?", a: "The <strong>cell</strong> is the basic structural and functional unit of all living organisms. Every living thing is made of one or more cells." },
+      { q: "What is the function of the cell membrane?", a: "It acts as a <strong>selective barrier</strong>, controlling what substances enter and leave the cell, maintaining the internal environment." },
+      { q: "What is photosynthesis?", a: "The process by which green plants use <strong>sunlight, water, and carbon dioxide</strong> to produce glucose and oxygen. It occurs in the chloroplasts." },
+      { q: "What are the main components of blood?", a: "Blood consists of <strong>red blood cells</strong> (oxygen transport), <strong>white blood cells</strong> (immunity), <strong>platelets</strong> (clotting), and <strong>plasma</strong> (liquid medium)." },
+      { q: "What is the difference between aerobic and anaerobic respiration?", a: "<strong>Aerobic</strong> respiration uses oxygen and releases more energy. <strong>Anaerobic</strong> respiration occurs without oxygen, releasing less energy and producing lactic acid or ethanol." },
+      { q: "What are the functions of the skeletal system?", a: "It provides <strong>support, protection</strong> of organs, enables movement, produces blood cells in bone marrow, and stores minerals like calcium." },
+      { q: "What is the role of the kidneys?", a: "The kidneys filter blood to remove <strong>waste products and excess water</strong>, forming urine. They also regulate blood pressure and ion balance." },
+      { q: "What is an ecosystem?", a: "A community of <strong>living organisms</strong> interacting with each other and their <strong>non-living environment</strong> such as soil, water, and air, functioning as a system." },
+      { q: "What is the process of osmosis?", a: "The movement of water molecules through a <strong>semi-permeable membrane</strong> from a region of high water concentration to a region of lower water concentration." },
+      { q: "What is the function of chlorophyll?", a: "<strong>Chlorophyll</strong> is the green pigment in plant chloroplasts that absorbs light energy, primarily red and blue wavelengths, to drive photosynthesis." },
+      { q: "What is the nucleus of a cell?", a: "The <strong>nucleus</strong> is the control centre of the cell. It contains DNA, which carries the genetic instructions for the cell's structure and function." },
+      { q: "What is the difference between a plant cell and an animal cell?", a: "Plant cells have a <strong>cell wall, chloroplasts, and a large central vacuole</strong>. Animal cells have none of these but do have centrioles, which plant cells generally lack." },
+      { q: "What is the function of mitochondria?", a: "Mitochondria are the <strong>powerhouse of the cell</strong>. They carry out aerobic respiration to release energy in the form of ATP for cellular activities." },
+      { q: "What is diffusion?", a: "The movement of particles from a region of <strong>high concentration</strong> to a region of <strong>low concentration</strong>, along a concentration gradient, until equilibrium is reached." },
+      { q: "What is a tissue?", a: "A <strong>tissue</strong> is a group of similar cells that work together to carry out a specific function. For example, muscle tissue enables movement." },
+      { q: "What is an organ?", a: "An <strong>organ</strong> is a structure made up of different tissues that work together to perform a specific function, such as the heart, lungs, or stomach." },
+      { q: "What is the function of the large intestine?", a: "The large intestine absorbs <strong>water and mineral salts</strong> from undigested food, and compacts the remaining material into faeces for excretion." },
+      { q: "What is the function of the small intestine?", a: "The small intestine is the main site of <strong>digestion and absorption of nutrients</strong>. Its inner lining has villi that increase the surface area for absorption." },
+      { q: "What are stomata?", a: "<strong>Stomata</strong> are tiny pores found mainly on the underside of leaves. They allow gas exchange (CO2 in, O2 out) and control water loss through transpiration." },
+      { q: "What is transpiration?", a: "<strong>Transpiration</strong> is the process by which water evaporates from the surfaces of leaves through stomata. It helps pull water up from the roots through the xylem." },
+      { q: "What is the function of xylem?", a: "<strong>Xylem</strong> is a plant tissue that transports water and dissolved minerals from the roots up to the leaves and other parts of the plant." },
+      { q: "What is the function of phloem?", a: "<strong>Phloem</strong> is a plant tissue that transports dissolved sugars (mainly sucrose) produced by photosynthesis from leaves to other parts of the plant." },
+      { q: "What is cellular respiration?", a: "The process by which cells break down <strong>glucose</strong> to release energy (ATP). The equation is: glucose + oxygen produces carbon dioxide + water + energy." },
+      { q: "What is a food chain?", a: "A <strong>food chain</strong> shows the flow of energy from one organism to another, starting with a producer (plant) and passing through herbivores and carnivores." },
+      { q: "What is the difference between a producer and a consumer?", a: "A <strong>producer</strong> makes its own food through photosynthesis (e.g. plants). A <strong>consumer</strong> obtains energy by eating other organisms." },
+      { q: "What is a herbivore?", a: "A <strong>herbivore</strong> is an animal that feeds only on plants. Examples include rabbits, deer, and cows." },
+      { q: "What is a carnivore?", a: "A <strong>carnivore</strong> is an animal that feeds on other animals. Examples include lions, eagles, and sharks." },
+      { q: "What is an omnivore?", a: "An <strong>omnivore</strong> is an animal that eats both plants and animals. Humans and bears are common examples." },
+      { q: "What is decomposition?", a: "<strong>Decomposition</strong> is the breakdown of dead organic matter by decomposers such as bacteria and fungi, recycling nutrients back into the soil." },
+      { q: "What is the water cycle?", a: "The continuous movement of water through <strong>evaporation, condensation, precipitation, and collection</strong>. It is driven by solar energy and gravity." },
+      { q: "What is biodiversity?", a: "<strong>Biodiversity</strong> refers to the variety of life in a given area, including all species of plants, animals, fungi, and microorganisms." },
+      { q: "What is adaptation?", a: "An <strong>adaptation</strong> is a feature of an organism that makes it better suited to survive and reproduce in its environment, developed through natural selection." },
+      { q: "What is the function of the heart?", a: "The <strong>heart</strong> is a muscular pump that circulates blood throughout the body, delivering oxygen and nutrients to cells and removing waste products." },
+      { q: "What is the function of red blood cells?", a: "<strong>Red blood cells</strong> contain haemoglobin, which binds to oxygen in the lungs and carries it to body tissues. They have no nucleus to maximise haemoglobin space." },
+      { q: "What is the function of white blood cells?", a: "<strong>White blood cells</strong> defend the body against infection. Some engulf pathogens (phagocytes) and others produce antibodies (lymphocytes)." },
+      { q: "What is a pathogen?", a: "A <strong>pathogen</strong> is a microorganism that causes disease. Examples include bacteria (tuberculosis), viruses (flu), fungi (ringworm), and parasites (malaria)." },
+      { q: "What is vaccination?", a: "<strong>Vaccination</strong> introduces a weakened or inactive form of a pathogen into the body, stimulating the immune system to produce antibodies without causing disease." },
+      { q: "What is the nervous system?", a: "The <strong>nervous system</strong> detects and responds to stimuli. It consists of the brain, spinal cord, and nerves, and coordinates the body's activities." },
+      { q: "What is a reflex action?", a: "A <strong>reflex action</strong> is an automatic, rapid response to a stimulus that does not involve conscious thought, such as pulling your hand away from heat." },
+      { q: "What is the endocrine system?", a: "The <strong>endocrine system</strong> is a network of glands that produce hormones, which are chemical messengers that regulate bodily functions like growth and metabolism." },
+      { q: "What is insulin?", a: "<strong>Insulin</strong> is a hormone produced by the pancreas that regulates blood glucose levels by stimulating cells to absorb glucose from the bloodstream." },
+      { q: "What is the function of the lungs?", a: "The <strong>lungs</strong> are the main organs of respiration. They allow oxygen to enter the blood and carbon dioxide to be removed, a process called gas exchange." },
+      { q: "What are alveoli?", a: "<strong>Alveoli</strong> are tiny air sacs in the lungs with very thin walls and a rich blood supply. Their large surface area allows efficient gas exchange." },
+      { q: "What is the difference between breathing and respiration?", a: "<strong>Breathing</strong> is the physical movement of air in and out of the lungs. <strong>Respiration</strong> is the chemical process of releasing energy from glucose in cells." },
+      { q: "What is the function of the liver?", a: "The liver produces <strong>bile</strong> for fat digestion, detoxifies blood, stores glycogen, and makes proteins. It is the largest internal organ in the body." },
+      { q: "What is excretion?", a: "<strong>Excretion</strong> is the removal of metabolic waste products from the body. The main organs of excretion are the kidneys (urine), lungs (CO2), and skin (sweat)." },
+      { q: "What is the difference between sexual and asexual reproduction?", a: "<strong>Sexual reproduction</strong> involves two parents and produces genetically varied offspring. <strong>Asexual reproduction</strong> involves one parent and produces genetically identical offspring (clones)." },
+      { q: "What is pollination?", a: "<strong>Pollination</strong> is the transfer of pollen from the anther of one flower to the stigma of another flower (or the same flower), enabling fertilisation in plants." },
+      { q: "What is fertilisation?", a: "<strong>Fertilisation</strong> is the fusion of a male gamete (sperm or pollen) with a female gamete (egg) to form a zygote, which develops into a new organism." },
+      { q: "What is a habitat?", a: "A <strong>habitat</strong> is the natural environment where an organism lives and finds everything it needs to survive, including food, water, shelter, and space." },
+      { q: "What is a niche?", a: "A <strong>niche</strong> is the specific role an organism plays within its ecosystem, including what it eats, what eats it, and how it interacts with its environment." },
+      { q: "What is natural selection?", a: "<strong>Natural selection</strong> is the process where organisms with traits better suited to their environment survive and reproduce more, passing those traits to offspring." },
+      { q: "What is evolution?", a: "<strong>Evolution</strong> is the gradual change in inherited characteristics of populations over many generations, driven by natural selection and genetic variation." },
+      { q: "What is a species?", a: "A <strong>species</strong> is a group of organisms that share common characteristics and can interbreed to produce fertile offspring." },
+      { q: "What is classification in biology?", a: "<strong>Classification</strong> is the grouping of organisms based on shared characteristics. The main levels are: Kingdom, Phylum, Class, Order, Family, Genus, Species." },
+      { q: "What are the five kingdoms of life?", a: "The five kingdoms are <strong>Animalia</strong> (animals), <strong>Plantae</strong> (plants), <strong>Fungi</strong>, <strong>Protista</strong> (single-celled organisms), and <strong>Monera</strong> (bacteria)." },
+      { q: "What is the difference between vertebrates and invertebrates?", a: "<strong>Vertebrates</strong> have a backbone (e.g. fish, birds, mammals). <strong>Invertebrates</strong> do not have a backbone (e.g. insects, worms, jellyfish)." },
+      { q: "What is a mammal?", a: "A <strong>mammal</strong> is a warm-blooded vertebrate that has hair or fur, gives birth to live young (mostly), and nurses its young with milk." },
+      { q: "What are the characteristics of birds?", a: "Birds are warm-blooded vertebrates with <strong>feathers, wings, a beak, and hollow bones</strong>. They lay eggs and have a high metabolic rate to support flight." },
+      { q: "What is the function of roots in plants?", a: "Roots <strong>anchor the plant</strong> in soil, absorb water and minerals, and sometimes store food (e.g. carrots and turnips)." },
+      { q: "What is the role of leaves in plants?", a: "Leaves are the main site of <strong>photosynthesis</strong>. They are broad and flat to maximise light absorption and have stomata for gas exchange." },
+      { q: "What is germination?", a: "<strong>Germination</strong> is the process by which a seed begins to develop into a seedling. It requires water, warmth, and oxygen." },
+      { q: "What is a parasite?", a: "A <strong>parasite</strong> is an organism that lives on or in a host organism, obtaining nutrients at the host's expense without immediately killing it. Examples include lice and tapeworms." },
+      { q: "What is symbiosis?", a: "<strong>Symbiosis</strong> is a close, long-term interaction between two different species. It includes mutualism, commensalism, and parasitism." },
+      { q: "What is mutualism?", a: "<strong>Mutualism</strong> is a symbiotic relationship where both organisms benefit. An example is the relationship between bees and flowers (pollination and nectar)." },
+      { q: "What is a virus?", a: "A <strong>virus</strong> is a non-living infectious agent made of genetic material (DNA or RNA) enclosed in a protein coat. It can only replicate inside a host cell." },
+      { q: "What is an antibiotic?", a: "<strong>Antibiotics</strong> are medicines that kill or inhibit the growth of bacteria. They are not effective against viruses." },
+      { q: "What is genetics?", a: "<strong>Genetics</strong> is the study of genes, heredity, and variation in living organisms. Genes are segments of DNA that determine inherited traits." },
+      { q: "What is DNA?", a: "<strong>DNA</strong> (deoxyribonucleic acid) is the molecule that carries the genetic instructions for the development, function, and reproduction of all living organisms." },
+      { q: "What is a chromosome?", a: "A <strong>chromosome</strong> is a thread-like structure of DNA and proteins found in the nucleus of a cell. Humans have 46 chromosomes arranged in 23 pairs." },
+      { q: "What is a gene?", a: "A <strong>gene</strong> is a segment of DNA that contains the instructions for making a specific protein, which determines a particular trait in an organism." },
+      { q: "What is variation?", a: "<strong>Variation</strong> is the differences that exist between individuals of the same species. It can be continuous (height) or discontinuous (blood group)." },
+      { q: "What is the difference between inherited and environmental variation?", a: "<strong>Inherited variation</strong> is passed from parent to offspring through genes. <strong>Environmental variation</strong> is caused by factors in the surroundings, such as diet and climate." },
+      { q: "What is homeostasis?", a: "<strong>Homeostasis</strong> is the maintenance of a stable internal environment in the body despite changes in external conditions, such as regulating body temperature and blood glucose." },
+      { q: "What are enzymes?", a: "<strong>Enzymes</strong> are biological catalysts made of protein. They speed up chemical reactions in the body without being used up. Each enzyme is specific to one substrate." },
+      { q: "What factors affect enzyme activity?", a: "Enzyme activity is affected by <strong>temperature and pH</strong>. Each enzyme has an optimal temperature and pH. High temperatures or extreme pH denature (permanently alter) the enzyme." },
+      { q: "What is the digestive system?", a: "The <strong>digestive system</strong> breaks down food into smaller molecules that can be absorbed into the bloodstream. It includes the mouth, oesophagus, stomach, and intestines." },
+      { q: "What are the four main food groups?", a: "The four main food groups are <strong>carbohydrates</strong> (energy), <strong>proteins</strong> (growth and repair), <strong>fats</strong> (energy store and insulation), and <strong>vitamins and minerals</strong> (regulation)." },
+      { q: "What is the function of bile?", a: "<strong>Bile</strong> is produced by the liver and stored in the gallbladder. It emulsifies fats, breaking large fat droplets into smaller ones to increase the surface area for digestion." },
+      { q: "What is the role of amylase?", a: "<strong>Amylase</strong> is a digestive enzyme found in saliva and pancreatic juice. It breaks down starch into simpler sugars like maltose." },
+      { q: "What is the menstrual cycle?", a: "The <strong>menstrual cycle</strong> is the monthly cycle of changes in the female reproductive system controlled by hormones, preparing the uterus for possible pregnancy." },
+      { q: "What are the main parts of a flower?", a: "The main parts of a flower are the <strong>petals, sepals, stamen</strong> (anther + filament), and <strong>pistil</strong> (stigma + style + ovary). The stamen is male; the pistil is female." },
+      { q: "What is seed dispersal?", a: "<strong>Seed dispersal</strong> is the spread of seeds away from the parent plant by wind, water, animals, or explosive mechanisms, to reduce competition for resources." },
+      { q: "What is the carbon cycle?", a: "The <strong>carbon cycle</strong> describes the movement of carbon through the environment via photosynthesis, respiration, decomposition, and combustion." },
+      { q: "What is the nitrogen cycle?", a: "The <strong>nitrogen cycle</strong> is the process by which nitrogen is converted between its various chemical forms, including fixation by bacteria, absorption by plants, and return to atmosphere." },
+      { q: "What is competition in ecology?", a: "<strong>Competition</strong> occurs when organisms compete for the same limited resources such as food, water, space, or mates. It can be between members of the same species (intraspecific) or different species (interspecific)." },
+      { q: "What is predation?", a: "<strong>Predation</strong> is an interaction where one organism (the predator) hunts and kills another (the prey) for food. It regulates prey populations in an ecosystem." },
+      { q: "What is the structure of a typical animal cell?", a: "A typical animal cell has a <strong>cell membrane, nucleus, cytoplasm, mitochondria, and ribosomes</strong>. It does not have a cell wall, chloroplasts, or a large vacuole." },
+      { q: "What are ribosomes?", a: "<strong>Ribosomes</strong> are tiny organelles found in the cytoplasm. They are the site of protein synthesis, translating genetic instructions from mRNA into proteins." },
+      { q: "What is the function of the vacuole in a plant cell?", a: "The large central <strong>vacuole</strong> in plant cells stores water and maintains turgor pressure, which keeps the plant rigid and upright." },
+      { q: "What is turgor pressure?", a: "<strong>Turgor pressure</strong> is the pressure exerted by water inside a plant cell against the cell wall. It keeps plant cells firm and prevents wilting." },
+      { q: "What is a reflex arc?", a: "A <strong>reflex arc</strong> is the pathway a nerve impulse travels during a reflex action: receptor, sensory neurone, relay neurone, motor neurone, effector." },
+      { q: "What is the function of the oesophagus?", a: "The <strong>oesophagus</strong> is the muscular tube that connects the mouth to the stomach. It moves food down using wave-like muscle contractions called peristalsis." },
+      { q: "What is peristalsis?", a: "<strong>Peristalsis</strong> is the rhythmic, wave-like contraction of smooth muscles in the digestive tract that moves food along from the oesophagus to the rectum." },
+      { q: "What is immunity?", a: "<strong>Immunity</strong> is the ability of an organism to resist a particular infection or toxin. It can be innate (present from birth) or acquired (developed after exposure or vaccination)." },
+      { q: "What is the role of the pancreas?", a: "The <strong>pancreas</strong> produces digestive enzymes (amylase, lipase, protease) that are released into the small intestine. It also produces the hormones insulin and glucagon." },
+      { q: "What is an antibody?", a: "An <strong>antibody</strong> is a protein produced by white blood cells (lymphocytes) in response to a specific antigen. Antibodies neutralise pathogens and mark them for destruction." },
+      { q: "What is an antigen?", a: "An <strong>antigen</strong> is a substance (usually a protein) on the surface of a pathogen that triggers an immune response and the production of specific antibodies." },
+      { q: "What is phototropism?", a: "<strong>Phototropism</strong> is the growth of a plant towards a light source. It is controlled by the hormone auxin, which causes cells on the shaded side to elongate more." },
+      { q: "What is geotropism?", a: "<strong>Geotropism</strong> is the directional growth of a plant in response to gravity. Roots grow downward (positive geotropism) and shoots grow upward (negative geotropism)." },
+      { q: "What is the difference between a food chain and a food web?", a: "A <strong>food chain</strong> shows a single pathway of energy transfer. A <strong>food web</strong> shows multiple interconnected food chains, giving a more realistic picture of an ecosystem." },
+      { q: "What is the function of haemoglobin?", a: "<strong>Haemoglobin</strong> is an iron-containing protein in red blood cells that binds to oxygen in the lungs and releases it to body tissues where oxygen concentration is lower." },
+      { q: "What is the difference between arteries, veins, and capillaries?", a: "<strong>Arteries</strong> carry blood away from the heart under high pressure. <strong>Veins</strong> carry blood back to the heart. <strong>Capillaries</strong> are microscopic vessels where exchange of nutrients and gases occurs." },
+    ]
+  },
+  chem: {
+    label: "Chemistry",
+    color: "chem",
+    cards: [
+      { q: "What is an atom?", a: "An atom is the <strong>smallest unit of matter</strong> that retains the chemical properties of an element. It consists of a nucleus (protons, neutrons) surrounded by electrons." },
+      { q: "What is the difference between an element and a compound?", a: "An <strong>element</strong> contains only one type of atom. A <strong>compound</strong> contains two or more different elements chemically bonded in a fixed ratio." },
+      { q: "What is a physical change?", a: "A change in which the <strong>physical properties</strong> of a substance alter but its chemical composition remains the same. Examples: melting, boiling, dissolving." },
+      { q: "What is a chemical change?", a: "A change that produces a new substance with different chemical properties. Signs include <strong>gas production, colour change, energy release, or precipitate formation</strong>." },
+      { q: "What are the three states of matter?", a: "Matter exists as a <strong>solid</strong> (fixed shape and volume), a <strong>liquid</strong> (fixed volume, variable shape), or a <strong>gas</strong> (no fixed shape or volume)." },
+      { q: "What is the periodic table?", a: "A systematic arrangement of all known elements ordered by <strong>increasing atomic number</strong>, grouped into rows (periods) and columns (groups) based on similar properties." },
+      { q: "What is the difference between an acid and a base?", a: "An <strong>acid</strong> has a pH below 7 and releases hydrogen ions. A <strong>base</strong> has a pH above 7. A neutral substance has a pH of exactly 7." },
+      { q: "What is a mixture?", a: "A <strong>mixture</strong> is a combination of two or more substances that are physically combined, not chemically bonded, and can be separated by physical methods." },
+      { q: "What is evaporation?", a: "The process where molecules at the <strong>surface</strong> of a liquid gain enough energy to escape into the air as vapour. It occurs at temperatures below the boiling point." },
+      { q: "What is sublimation?", a: "<strong>Sublimation</strong> is the direct change of a substance from solid to gas without passing through the liquid phase. Iodine and dry ice are common examples." },
+      { q: "What is the atomic number of an element?", a: "The <strong>atomic number</strong> is the number of protons in the nucleus of an atom of that element. It uniquely identifies each element in the periodic table." },
+      { q: "What is the mass number of an atom?", a: "The <strong>mass number</strong> is the total number of protons and neutrons in the nucleus of an atom. Mass number = protons + neutrons." },
+      { q: "What are isotopes?", a: "<strong>Isotopes</strong> are atoms of the same element that have the same number of protons but different numbers of neutrons, giving them different mass numbers." },
+      { q: "What is a molecule?", a: "A <strong>molecule</strong> is a group of two or more atoms chemically bonded together. For example, a water molecule (H2O) consists of two hydrogen atoms and one oxygen atom." },
+      { q: "What is the chemical formula of water?", a: "Water has the chemical formula <strong>H2O</strong>, meaning each molecule contains two hydrogen atoms bonded to one oxygen atom." },
+      { q: "What is the difference between homogeneous and heterogeneous mixtures?", a: "A <strong>homogeneous</strong> mixture has a uniform composition throughout (e.g. salt water). A <strong>heterogeneous</strong> mixture has a non-uniform composition (e.g. sand and gravel)." },
+      { q: "What is filtration used for?", a: "<strong>Filtration</strong> separates an insoluble solid from a liquid. The liquid passes through filter paper while the solid (residue) is retained on the paper." },
+      { q: "What is distillation?", a: "<strong>Distillation</strong> separates a liquid from a dissolved solid by boiling the liquid, collecting the vapour, and condensing it back. It exploits differences in boiling points." },
+      { q: "What is chromatography?", a: "<strong>Chromatography</strong> separates mixtures based on the different rates at which components travel through a stationary medium (e.g. paper) when carried by a solvent." },
+      { q: "What is a solute, solvent, and solution?", a: "A <strong>solute</strong> is the substance dissolved. A <strong>solvent</strong> is the substance doing the dissolving. A <strong>solution</strong> is the homogeneous mixture formed." },
+      { q: "What is solubility?", a: "<strong>Solubility</strong> is the maximum amount of a solute that can dissolve in a given quantity of solvent at a specific temperature to form a saturated solution." },
+      { q: "What is a saturated solution?", a: "A <strong>saturated solution</strong> is one that contains the maximum amount of dissolved solute at a given temperature. No more solute can dissolve without changing conditions." },
+      { q: "What is crystallisation?", a: "<strong>Crystallisation</strong> is a technique for obtaining a pure solid from a solution by evaporating the solvent slowly, causing the dissolved substance to form crystals." },
+      { q: "What are the properties of metals?", a: "Metals are generally <strong>lustrous, malleable, ductile, good conductors</strong> of heat and electricity, and have high melting and boiling points." },
+      { q: "What are the properties of non-metals?", a: "Non-metals are generally <strong>dull, brittle, poor conductors</strong> of heat and electricity, and have lower melting and boiling points than metals." },
+      { q: "What is an alloy?", a: "An <strong>alloy</strong> is a mixture of a metal with one or more other elements (metals or non-metals). Alloys usually have improved properties. Steel is iron + carbon." },
+      { q: "What is corrosion?", a: "<strong>Corrosion</strong> is the gradual chemical deterioration of a metal by reaction with substances in its environment, usually oxygen and water. Rusting is the corrosion of iron." },
+      { q: "What is rusting?", a: "<strong>Rusting</strong> is the corrosion of iron to form iron oxide (rust). It requires both <strong>water and oxygen</strong>. It weakens the iron structure over time." },
+      { q: "What is combustion?", a: "<strong>Combustion</strong> is a chemical reaction between a substance and oxygen that releases heat and light (fire). Complete combustion produces carbon dioxide and water." },
+      { q: "What is the difference between exothermic and endothermic reactions?", a: "<strong>Exothermic</strong> reactions release energy (heat) to the surroundings (e.g. burning). <strong>Endothermic</strong> reactions absorb energy from the surroundings (e.g. photosynthesis)." },
+      { q: "What is neutralisation?", a: "<strong>Neutralisation</strong> is the reaction between an acid and a base to produce a salt and water. The pH of the resulting solution is closer to 7." },
+      { q: "What is a salt in chemistry?", a: "A <strong>salt</strong> is an ionic compound formed when the hydrogen ions of an acid are replaced by metal ions, typically through neutralisation. Table salt is sodium chloride (NaCl)." },
+      { q: "What is the pH scale?", a: "The <strong>pH scale</strong> measures how acidic or alkaline a solution is, ranging from 0 (strongly acidic) to 14 (strongly alkaline). pH 7 is neutral." },
+      { q: "What is an indicator?", a: "An <strong>indicator</strong> is a substance that changes colour depending on the pH of a solution. Litmus turns red in acid and blue in alkali. Universal indicator shows a range of colours." },
+      { q: "What is the law of conservation of mass?", a: "In a chemical reaction, <strong>mass is neither created nor destroyed</strong>. The total mass of reactants equals the total mass of products." },
+      { q: "What is a chemical equation?", a: "A <strong>chemical equation</strong> is a symbolic representation of a chemical reaction, showing the reactants on the left and the products on the right, separated by an arrow." },
+      { q: "What does a balanced chemical equation show?", a: "A <strong>balanced equation</strong> shows that the number of atoms of each element is equal on both sides, obeying the law of conservation of mass." },
+      { q: "What is a catalyst?", a: "A <strong>catalyst</strong> is a substance that speeds up a chemical reaction without being permanently changed or consumed by the reaction. It lowers the activation energy required." },
+      { q: "What is activation energy?", a: "<strong>Activation energy</strong> is the minimum amount of energy required for a chemical reaction to begin. Catalysts reduce the activation energy needed." },
+      { q: "What are the signs of a chemical reaction?", a: "Signs of a chemical reaction include <strong>colour change, gas production, formation of a precipitate, temperature change, or emission of light</strong>." },
+      { q: "What is a precipitate?", a: "A <strong>precipitate</strong> is an insoluble solid that forms when two solutions are mixed and react. It appears as a cloudy solid within the liquid." },
+      { q: "What is the difference between a solution and a suspension?", a: "In a <strong>solution</strong>, the solute dissolves completely forming a clear mixture. In a <strong>suspension</strong>, particles do not dissolve and will eventually settle out." },
+      { q: "What is a colloid?", a: "A <strong>colloid</strong> is a mixture where one substance is dispersed throughout another but the particles are larger than in a solution yet small enough not to settle. Milk is an example." },
+      { q: "What are noble gases?", a: "<strong>Noble gases</strong> (Group 18) are chemically inert elements. They have full outer electron shells, making them very unreactive. Examples: helium, neon, argon." },
+      { q: "What is an electron shell?", a: "An <strong>electron shell</strong> is a region of space around the nucleus where electrons are found. Shells are filled from the innermost outward: 2, 8, 8 electrons per shell." },
+      { q: "What is ionic bonding?", a: "<strong>Ionic bonding</strong> is the electrostatic attraction between oppositely charged ions. It occurs when one atom transfers electrons to another, forming positive and negative ions." },
+      { q: "What is covalent bonding?", a: "<strong>Covalent bonding</strong> is the sharing of electron pairs between non-metal atoms. It forms molecules and results in stable electron configurations." },
+      { q: "What is an ion?", a: "An <strong>ion</strong> is an atom or group of atoms that has gained or lost electrons, giving it a positive or negative electrical charge." },
+      { q: "What is the difference between a cation and an anion?", a: "A <strong>cation</strong> is a positively charged ion formed by losing electrons. An <strong>anion</strong> is a negatively charged ion formed by gaining electrons." },
+      { q: "What is the reactivity series of metals?", a: "The <strong>reactivity series</strong> ranks metals from most to least reactive: potassium, sodium, calcium, magnesium, aluminium, zinc, iron, lead, copper, silver, gold." },
+      { q: "What is displacement reaction?", a: "A <strong>displacement reaction</strong> occurs when a more reactive metal displaces a less reactive metal from its compound. E.g. zinc displaces copper from copper sulphate solution." },
+      { q: "What is oxidation?", a: "<strong>Oxidation</strong> is the loss of electrons (or gain of oxygen) by a substance. In reactions, oxidation always occurs alongside reduction (OIL RIG)." },
+      { q: "What is reduction?", a: "<strong>Reduction</strong> is the gain of electrons (or loss of oxygen) by a substance. It always occurs alongside oxidation in a redox reaction." },
+      { q: "What is a redox reaction?", a: "A <strong>redox reaction</strong> is one in which both oxidation and reduction occur simultaneously. One substance loses electrons (is oxidised) while another gains them (is reduced)." },
+      { q: "What is electrolysis?", a: "<strong>Electrolysis</strong> is the decomposition of an ionic compound (in molten form or solution) by passing an electric current through it. Positive ions move to the cathode, negative ions to the anode." },
+      { q: "What is the chemical formula of common salt?", a: "Common salt is <strong>sodium chloride</strong>, with the formula NaCl. It is formed by the ionic bonding of sodium (Na+) and chloride (Cl-) ions." },
+      { q: "What is a hydrocarbon?", a: "A <strong>hydrocarbon</strong> is a compound made up of only hydrogen and carbon atoms. Methane (CH4) and ethane (C2H6) are examples found in natural gas." },
+      { q: "What are fossil fuels?", a: "<strong>Fossil fuels</strong> are fuels formed over millions of years from the remains of ancient organisms. They include coal, oil, and natural gas, all of which are hydrocarbons." },
+      { q: "What happens during the complete combustion of a hydrocarbon?", a: "During complete combustion, a hydrocarbon reacts with excess oxygen to produce <strong>carbon dioxide and water</strong>, releasing large amounts of energy." },
+      { q: "What is incomplete combustion?", a: "<strong>Incomplete combustion</strong> occurs when there is insufficient oxygen. It produces carbon monoxide (a toxic gas) and carbon (soot) instead of only CO2 and water." },
+      { q: "What is the chemical formula of carbon dioxide?", a: "Carbon dioxide has the formula <strong>CO2</strong>, meaning one carbon atom is covalently bonded to two oxygen atoms." },
+      { q: "What is the greenhouse effect?", a: "The <strong>greenhouse effect</strong> is the warming of Earth caused by greenhouse gases (CO2, methane, water vapour) trapping heat radiated from the planet's surface." },
+      { q: "What is the difference between organic and inorganic chemistry?", a: "<strong>Organic chemistry</strong> studies carbon-containing compounds, especially those found in living organisms. <strong>Inorganic chemistry</strong> studies all other elements and their compounds." },
+      { q: "What is a polymer?", a: "A <strong>polymer</strong> is a large molecule made of many repeating smaller units (monomers) joined together. Plastics, rubber, and proteins are all polymers." },
+      { q: "What is the atomic structure?", a: "An atom has a central <strong>nucleus</strong> containing positively charged protons and neutral neutrons. Negatively charged electrons orbit the nucleus in shells." },
+      { q: "What is a chemical bond?", a: "A <strong>chemical bond</strong> is the force of attraction that holds atoms or ions together in a compound. Types include ionic, covalent, and metallic bonds." },
+      { q: "What is the difference between physical and chemical properties?", a: "<strong>Physical properties</strong> (colour, density, melting point) can be observed without changing the substance. <strong>Chemical properties</strong> describe how a substance reacts to form new substances." },
+      { q: "What is a pure substance?", a: "A <strong>pure substance</strong> consists of only one type of element or compound with a fixed, definite composition and distinct physical properties like melting and boiling point." },
+      { q: "What are the characteristics of gases?", a: "Gases have <strong>no fixed shape or volume</strong>, particles that move rapidly and are far apart, low density, and are easily compressed. They exert pressure on their containers." },
+      { q: "What is the kinetic theory of matter?", a: "The <strong>kinetic theory</strong> states that all matter is made of particles that are in constant motion. The speed of motion increases with temperature." },
+      { q: "What is Brownian motion?", a: "<strong>Brownian motion</strong> is the random, erratic movement of small particles suspended in a fluid, caused by collisions with fast-moving molecules of the fluid." },
+      { q: "What is the formula for calculating density?", a: "<strong>Density = Mass / Volume</strong> (D = m/V). It is measured in g/cm3 or kg/m3 and is a unique physical property of each material." },
+      { q: "What is an endothermic process?", a: "An <strong>endothermic process</strong> absorbs heat energy from the surroundings, causing the surroundings to cool. Examples: dissolving ammonium nitrate, photosynthesis, melting ice." },
+      { q: "What is chemical weathering?", a: "<strong>Chemical weathering</strong> is the breakdown of rocks through chemical reactions, such as the reaction of acid rain with limestone (calcium carbonate) to form calcium bicarbonate." },
+      { q: "What is the difference between dilute and concentrated solutions?", a: "A <strong>dilute solution</strong> contains a small amount of solute relative to solvent. A <strong>concentrated solution</strong> contains a large amount of solute." },
+      { q: "What is effervescence?", a: "<strong>Effervescence</strong> is the formation of gas bubbles in a liquid during a chemical reaction. For example, adding hydrochloric acid to marble chips produces CO2 bubbles." },
+      { q: "What is the test for oxygen gas?", a: "A <strong>glowing splint</strong> is used to test for oxygen. If oxygen is present, the splint relights (re-ignites) when held near the gas." },
+      { q: "What is the test for carbon dioxide gas?", a: "Carbon dioxide is tested by bubbling the gas through <strong>limewater</strong>. If CO2 is present, the limewater turns milky (cloudy) due to calcium carbonate formation." },
+      { q: "What is the test for hydrogen gas?", a: "A <strong>lit splint</strong> is used to test for hydrogen. If hydrogen is present, it produces a squeaky pop as it reacts rapidly with oxygen in the air." },
+      { q: "What is the difference between a weak and a strong acid?", a: "A <strong>strong acid</strong> fully ionises in water (e.g. hydrochloric acid). A <strong>weak acid</strong> only partially ionises (e.g. ethanoic acid). Both have a pH below 7." },
+      { q: "What is acid rain?", a: "<strong>Acid rain</strong> is precipitation with a pH below 5.6, caused by the dissolving of sulphur dioxide and nitrogen oxides (from burning fossil fuels) in atmospheric water." },
+      { q: "What is the formula of sulphuric acid?", a: "Sulphuric acid has the chemical formula <strong>H2SO4</strong>. It is a strong, corrosive acid widely used in industry and car batteries." },
+      { q: "What is the formula of hydrochloric acid?", a: "Hydrochloric acid has the chemical formula <strong>HCl</strong>. It is produced in the stomach (as gastric acid) to aid digestion and kill bacteria." },
+      { q: "What is the formula of nitric acid?", a: "Nitric acid has the chemical formula <strong>HNO3</strong>. It is used in the manufacture of fertilisers and explosives." },
+      { q: "What is the difference between chemical and physical separation methods?", a: "<strong>Physical separation</strong> (filtration, distillation) does not change the chemical nature of substances. <strong>Chemical separation</strong> involves chemical reactions that produce new substances." },
+      { q: "What is a chemical symbol?", a: "A <strong>chemical symbol</strong> is a one or two-letter abbreviation representing an element. For example, O for oxygen, Fe for iron, Au for gold, and Na for sodium." },
+      { q: "Why does sodium have the symbol Na?", a: "Sodium's symbol <strong>Na</strong> comes from its Latin name <em>Natrium</em>. Many element symbols are derived from their Latin, Greek, or Arabic names." },
+      { q: "What is a group in the periodic table?", a: "A <strong>group</strong> is a vertical column in the periodic table. Elements in the same group have the same number of outer electrons and similar chemical properties." },
+      { q: "What is a period in the periodic table?", a: "A <strong>period</strong> is a horizontal row in the periodic table. Moving across a period, the atomic number increases and properties change from metallic to non-metallic." },
+      { q: "What are alkali metals?", a: "<strong>Alkali metals</strong> are Group 1 elements (lithium, sodium, potassium). They are soft, highly reactive metals that react vigorously with water to produce hydrogen gas and a hydroxide." },
+      { q: "What are halogens?", a: "<strong>Halogens</strong> are Group 17 elements (fluorine, chlorine, bromine, iodine). They are reactive non-metals that form salts when reacting with metals." },
+      { q: "What is the law of constant proportions?", a: "The <strong>law of constant proportions</strong> states that a chemical compound always contains its constituent elements in a fixed ratio by mass, regardless of its source or method of preparation." },
+      { q: "What is the difference between a reversible and irreversible reaction?", a: "A <strong>reversible reaction</strong> can proceed in both directions (forward and backward). An <strong>irreversible reaction</strong> proceeds in one direction only, with products that cannot revert to reactants under normal conditions." },
+      { q: "What is a chemical formula?", a: "A <strong>chemical formula</strong> uses element symbols and subscript numbers to show the types and number of atoms present. For example, H2O has 2 hydrogen atoms and 1 oxygen atom." },
+      { q: "What is the test for water?", a: "Anhydrous <strong>cobalt chloride paper</strong> is used to test for water. It turns from blue to pink when water is present. Anhydrous copper sulphate (white) also turns blue." },
+      { q: "What is the difference between soluble and insoluble substances?", a: "A <strong>soluble</strong> substance dissolves in a given solvent to form a solution. An <strong>insoluble</strong> substance does not dissolve. Solubility depends on the solvent and temperature." },
+      { q: "What is decanting?", a: "<strong>Decanting</strong> is a separation technique where a liquid is carefully poured away from a settled solid (sediment) without disturbing the solid at the bottom." },
+      { q: "What is a universal indicator?", a: "A <strong>universal indicator</strong> is a mixture of indicators that shows a range of colours for different pH values, from red (strongly acidic) through green (neutral) to purple (strongly alkaline)." },
+      { q: "What is a diatomic molecule?", a: "A <strong>diatomic molecule</strong> consists of exactly two atoms bonded together. Some elements naturally exist as diatomic molecules, such as O2, N2, H2, Cl2, Br2, I2, and F2." },
+      { q: "What is the difference between an organic and inorganic compound?", a: "<strong>Organic compounds</strong> contain carbon atoms bonded to hydrogen (and often other elements). <strong>Inorganic compounds</strong> generally do not contain carbon-hydrogen bonds." },
+    ]
+  },
+  phy: {
+    label: "Physics",
+    color: "phy",
+    cards: [
+      { q: "What is the difference between speed and velocity?", a: "<strong>Speed</strong> is the distance traveled per unit time (a scalar quantity). <strong>Velocity</strong> is the displacement per unit time in a specific direction (a vector quantity)." },
+      { q: "What is Newton's First Law of Motion?", a: "An object at rest remains at rest, and an object in motion continues in motion at constant velocity, unless acted upon by an external <strong>unbalanced force</strong>. This is the law of inertia." },
+      { q: "What is Newton's Second Law of Motion?", a: "The acceleration of an object is directly proportional to the net force acting on it and inversely proportional to its mass: <strong>F = ma</strong>." },
+      { q: "What is Newton's Third Law of Motion?", a: "For every action force there is an equal and opposite <strong>reaction force</strong>. These forces act on different objects and are always equal in magnitude and opposite in direction." },
+      { q: "What is the difference between mass and weight?", a: "<strong>Mass</strong> is the amount of matter in an object (measured in kg, does not change with location). <strong>Weight</strong> is the gravitational force on that mass (measured in Newtons)." },
+      { q: "What is friction?", a: "<strong>Friction</strong> is a contact force that opposes the relative motion between two surfaces. It acts parallel to the surfaces and in the direction opposite to motion." },
+      { q: "What is the law of conservation of energy?", a: "Energy can neither be <strong>created nor destroyed</strong>. It can only be transformed from one form to another. The total energy of an isolated system always remains constant." },
+      { q: "What is the difference between kinetic and potential energy?", a: "<strong>Kinetic energy</strong> is the energy of a moving object (KE = 1/2 mv2). <strong>Potential energy</strong> is stored energy due to position or state (e.g. gravitational PE = mgh)." },
+      { q: "What is reflection of light?", a: "The <strong>bouncing back</strong> of light rays when they hit a surface. The law of reflection states that the angle of incidence equals the angle of reflection, both measured from the normal." },
+      { q: "What is refraction of light?", a: "The <strong>bending of light</strong> as it passes from one medium to another with different optical density, caused by a change in the speed of light at the boundary." },
+      { q: "What is acceleration?", a: "<strong>Acceleration</strong> is the rate of change of velocity with respect to time. It is a vector quantity. Formula: a = (v - u) / t. Units: metres per second squared (m/s2)." },
+      { q: "What is displacement?", a: "<strong>Displacement</strong> is the shortest distance from an object's starting point to its ending point, in a specific direction. It is a vector quantity, unlike distance." },
+      { q: "What is the formula for speed?", a: "<strong>Speed = Distance / Time</strong>. It is measured in metres per second (m/s) or kilometres per hour (km/h). It is a scalar quantity with no directional component." },
+      { q: "What is inertia?", a: "<strong>Inertia</strong> is the tendency of an object to resist any change in its state of rest or uniform motion. Greater mass means greater inertia." },
+      { q: "What is gravity?", a: "<strong>Gravity</strong> is the attractive force between any two objects with mass. On Earth, it gives weight to objects and causes them to accelerate downward at approximately 9.8 m/s2." },
+      { q: "What is work done in physics?", a: "<strong>Work done</strong> is the energy transferred when a force causes an object to move in the direction of the force. Formula: W = F x d. Units: Joules (J)." },
+      { q: "What is power?", a: "<strong>Power</strong> is the rate at which work is done or energy is transferred. Formula: P = W / t. Units: Watts (W), where 1 Watt = 1 Joule per second." },
+      { q: "What is pressure?", a: "<strong>Pressure</strong> is the force acting per unit area. Formula: P = F / A. Units: Pascals (Pa) or N/m2. A smaller area produces greater pressure for the same force." },
+      { q: "What is the difference between a scalar and a vector quantity?", a: "A <strong>scalar</strong> has magnitude only (e.g. speed, mass, temperature). A <strong>vector</strong> has both magnitude and direction (e.g. velocity, force, displacement)." },
+      { q: "What is the law of conservation of momentum?", a: "The total <strong>momentum</strong> of a closed system remains constant provided no external forces act on it. Momentum = mass x velocity (p = mv)." },
+      { q: "What is a wave?", a: "A <strong>wave</strong> is a disturbance that transfers energy from one point to another without transferring matter. Waves can be transverse or longitudinal." },
+      { q: "What is the difference between transverse and longitudinal waves?", a: "In a <strong>transverse wave</strong>, the vibration is perpendicular to the direction of travel (e.g. light). In a <strong>longitudinal wave</strong>, vibration is parallel to travel (e.g. sound)." },
+      { q: "What is the wavelength of a wave?", a: "<strong>Wavelength</strong> is the distance between two consecutive points in phase, such as two crests or two troughs. It is measured in metres." },
+      { q: "What is the frequency of a wave?", a: "<strong>Frequency</strong> is the number of complete waves passing a point per second. It is measured in Hertz (Hz). Higher frequency means shorter wavelength." },
+      { q: "What is the amplitude of a wave?", a: "<strong>Amplitude</strong> is the maximum displacement of a wave from its rest position. A larger amplitude means a wave carries more energy." },
+      { q: "What is the wave speed formula?", a: "<strong>Wave speed = frequency x wavelength</strong> (v = f x lambda). For example, if a wave has a frequency of 10 Hz and wavelength of 2 m, its speed is 20 m/s." },
+      { q: "What is the speed of light in vacuum?", a: "The speed of light in a vacuum is approximately <strong>3 x 10^8 metres per second</strong> (300,000 km/s). It is denoted by the letter c." },
+      { q: "What is sound?", a: "<strong>Sound</strong> is a longitudinal mechanical wave produced by vibrating objects. It requires a medium to travel through (solid, liquid, or gas) and cannot travel through a vacuum." },
+      { q: "How does sound travel faster in solids than in gases?", a: "In <strong>solids</strong>, particles are closer together and more rigidly bonded, so vibrations are transmitted more quickly. The speed of sound in air is ~340 m/s; in steel it is ~5000 m/s." },
+      { q: "What is an echo?", a: "An <strong>echo</strong> is the reflection of sound from a hard surface. For an echo to be heard distinctly, the reflecting surface must be at least 17 m away from the source." },
+      { q: "What is the electromagnetic spectrum?", a: "The <strong>electromagnetic spectrum</strong> is the range of all types of electromagnetic radiation arranged by wavelength: radio waves, microwaves, infrared, visible light, UV, X-rays, gamma rays." },
+      { q: "What are electromagnetic waves?", a: "<strong>Electromagnetic waves</strong> are transverse waves that transfer energy and do not require a medium. They all travel at the speed of light in a vacuum." },
+      { q: "What is the visible light spectrum?", a: "The <strong>visible spectrum</strong> is the range of light wavelengths detectable by the human eye, ranging from red (longest wavelength) through orange, yellow, green, blue, to violet (shortest)." },
+      { q: "What is dispersion of light?", a: "<strong>Dispersion</strong> is the splitting of white light into its constituent colours (spectrum) by a prism or droplet of water, because different wavelengths refract at different angles." },
+      { q: "What is a convex lens?", a: "A <strong>convex (converging) lens</strong> is thicker in the middle. It refracts light rays inward so they converge at a focal point. It is used in cameras, eyes, and magnifying glasses." },
+      { q: "What is a concave lens?", a: "A <strong>concave (diverging) lens</strong> is thinner in the middle. It refracts light outward, causing rays to diverge. It is used to correct short-sightedness." },
+      { q: "What is an electric circuit?", a: "An <strong>electric circuit</strong> is a closed path through which electric current flows. It must include a power source, conductors (wires), and a load (e.g. bulb or resistor)." },
+      { q: "What is the difference between a series and a parallel circuit?", a: "In a <strong>series circuit</strong>, components are connected end-to-end in a single path. In a <strong>parallel circuit</strong>, components are connected across multiple paths sharing the same voltage." },
+      { q: "What is electric current?", a: "<strong>Electric current</strong> is the flow of electric charge (electrons) through a conductor. It is measured in Amperes (A) using an ammeter connected in series." },
+      { q: "What is voltage (potential difference)?", a: "<strong>Voltage</strong> is the energy transferred per unit charge between two points in a circuit. It is measured in Volts (V) using a voltmeter connected in parallel." },
+      { q: "What is resistance?", a: "<strong>Resistance</strong> is the opposition to the flow of electric current. It is measured in Ohms (Omega). A higher resistance means less current flows for the same voltage." },
+      { q: "What is Ohm's Law?", a: "<strong>Ohm's Law</strong> states that the current through a conductor is directly proportional to the voltage across it, provided temperature remains constant: V = IR." },
+      { q: "What is a conductor and an insulator?", a: "A <strong>conductor</strong> allows electric current to flow easily (e.g. copper, silver). An <strong>insulator</strong> does not allow current to flow (e.g. rubber, plastic, wood)." },
+      { q: "What is static electricity?", a: "<strong>Static electricity</strong> is the build-up of electric charge on an insulating surface caused by friction (triboelectric effect). It can cause sparks and attract lightweight objects." },
+      { q: "What is a magnet?", a: "A <strong>magnet</strong> is an object that produces a magnetic field and exerts a force on other magnetic materials and moving electric charges. It has two poles: north and south." },
+      { q: "What are magnetic poles?", a: "A magnet has a <strong>north pole and a south pole</strong>. Like poles repel each other; unlike poles attract. A magnet's poles cannot be separated." },
+      { q: "What is a magnetic field?", a: "A <strong>magnetic field</strong> is the region of space around a magnet or current-carrying conductor where a magnetic force is exerted on other magnetic materials." },
+      { q: "What is electromagnetic induction?", a: "<strong>Electromagnetic induction</strong> is the production of an electromotive force (voltage) in a conductor when it moves through a magnetic field or when the magnetic field changes around it." },
+      { q: "What is an electromagnet?", a: "An <strong>electromagnet</strong> is a temporary magnet created by passing electric current through a coil of wire wound around an iron core. Its strength can be increased by more turns, higher current, or a ferromagnetic core." },
+      { q: "What is thermal energy?", a: "<strong>Thermal energy</strong> (heat) is the total kinetic energy of particles in a substance due to their random motion. Temperature measures the average kinetic energy of particles." },
+      { q: "What are the three methods of heat transfer?", a: "Heat is transferred by <strong>conduction</strong> (through solids via particle vibrations), <strong>convection</strong> (through fluids via movement of particles), and <strong>radiation</strong> (via electromagnetic waves, no medium needed)." },
+      { q: "What is conduction of heat?", a: "<strong>Conduction</strong> is the transfer of heat through a solid by the vibration of particles passing energy to neighbouring particles. Metals are good conductors due to free electrons." },
+      { q: "What is convection?", a: "<strong>Convection</strong> is the transfer of heat in fluids (liquids and gases) by the movement of heated, less-dense fluid upward and cooler, denser fluid downward, forming convection currents." },
+      { q: "What is radiation in heat transfer?", a: "<strong>Radiation</strong> is the transfer of energy by electromagnetic waves (infrared) without needing a medium. All objects emit radiation; the hotter the object, the more radiation it emits." },
+      { q: "What is temperature?", a: "<strong>Temperature</strong> is a measure of the average kinetic energy of the particles in a substance. It is measured in degrees Celsius (C) or Kelvin (K)." },
+      { q: "What is absolute zero?", a: "<strong>Absolute zero</strong> is the lowest possible temperature, at which particles have minimum energy. It is 0 Kelvin, which equals -273 degrees Celsius." },
+      { q: "What is the difference between heat and temperature?", a: "<strong>Heat</strong> is the total thermal energy transferred between objects. <strong>Temperature</strong> is the measure of average kinetic energy of particles. A large cold object can have more heat than a small hot one." },
+      { q: "What is the principle of moments?", a: "The <strong>principle of moments</strong> states that for an object in equilibrium, the sum of clockwise moments about a pivot equals the sum of anticlockwise moments. Moment = Force x perpendicular distance." },
+      { q: "What is a lever?", a: "A <strong>lever</strong> is a simple machine that consists of a rigid bar pivoting about a fulcrum. It amplifies force, allowing a smaller effort to move a larger load." },
+      { q: "What is the centre of gravity?", a: "The <strong>centre of gravity</strong> is the point where the entire weight of an object appears to act. An object balances perfectly at this point." },
+      { q: "What is buoyancy?", a: "<strong>Buoyancy</strong> (upthrust) is the upward force exerted by a fluid on an object submerged in it. An object floats when the upthrust equals its weight." },
+      { q: "What is Archimedes' principle?", a: "<strong>Archimedes' principle</strong> states that the upthrust on an object submerged in a fluid equals the weight of the fluid displaced by the object." },
+      { q: "What is density and how does it relate to floating?", a: "<strong>Density = mass / volume</strong>. An object floats if its density is less than the density of the fluid. It sinks if its density is greater." },
+      { q: "What is a pulley?", a: "A <strong>pulley</strong> is a simple machine consisting of a wheel and a rope. It changes the direction of force and, when used in a system, can reduce the effort needed to lift a load." },
+      { q: "What is mechanical advantage?", a: "<strong>Mechanical advantage</strong> is the ratio of the load to the effort in a machine. A mechanical advantage greater than 1 means the machine multiplies force." },
+      { q: "What is the formula for the moment of a force?", a: "<strong>Moment = Force x perpendicular distance from the pivot</strong>. It is measured in Newton-metres (Nm). A larger force or distance produces a greater turning effect." },
+      { q: "What is the difference between elastic and inelastic collisions?", a: "In an <strong>elastic collision</strong>, both momentum and kinetic energy are conserved. In an <strong>inelastic collision</strong>, momentum is conserved but kinetic energy is not (some is lost as heat or sound)." },
+      { q: "What is terminal velocity?", a: "<strong>Terminal velocity</strong> is the constant speed reached by a falling object when the drag force (air resistance) equals the gravitational force (weight), so there is no net force and no acceleration." },
+      { q: "What is the formula for gravitational potential energy?", a: "<strong>GPE = mgh</strong>, where m is mass (kg), g is gravitational field strength (9.8 N/kg on Earth), and h is height (m). GPE is measured in Joules." },
+      { q: "What is the formula for kinetic energy?", a: "<strong>KE = 1/2 mv2</strong>, where m is the mass (kg) and v is the speed (m/s). Kinetic energy is measured in Joules (J)." },
+      { q: "What is the unit of force?", a: "The unit of force is the <strong>Newton (N)</strong>. 1 Newton is the force needed to accelerate a mass of 1 kg at 1 m/s2. Force is a vector quantity." },
+      { q: "What is the unit of energy?", a: "The unit of energy is the <strong>Joule (J)</strong>. It is also the unit of work done. 1 Joule = 1 Newton x 1 metre." },
+      { q: "What is efficiency of a machine?", a: "<strong>Efficiency = (useful energy output / total energy input) x 100%</strong>. No real machine is 100% efficient because some energy is always lost as heat due to friction." },
+      { q: "What is an oscillation?", a: "An <strong>oscillation</strong> is one complete back-and-forth motion of a vibrating object around its equilibrium position. The time for one oscillation is the period." },
+      { q: "What is the period of a wave or pendulum?", a: "The <strong>period (T)</strong> is the time taken for one complete oscillation or one full wave cycle, measured in seconds. Frequency and period are inversely related: f = 1/T." },
+      { q: "What is a simple pendulum?", a: "A <strong>simple pendulum</strong> consists of a mass (bob) suspended by a string. The period of its oscillation depends on the length of the string and the value of g, not on the mass of the bob." },
+      { q: "What is the principle of superposition?", a: "The <strong>principle of superposition</strong> states that when two waves meet at a point, the resultant displacement is the algebraic sum of their individual displacements." },
+      { q: "What is the difference between renewable and non-renewable energy sources?", a: "<strong>Renewable sources</strong> (solar, wind, hydro) are replenished naturally and do not run out. <strong>Non-renewable sources</strong> (fossil fuels, nuclear) are finite and will eventually be exhausted." },
+      { q: "What is nuclear energy?", a: "<strong>Nuclear energy</strong> is released from the nucleus of an atom during fission (splitting heavy nuclei) or fusion (joining light nuclei). It is an extremely concentrated form of energy." },
+      { q: "What is the difference between nuclear fission and fusion?", a: "<strong>Fission</strong> is the splitting of a heavy nucleus (e.g. uranium) into smaller nuclei, releasing energy. <strong>Fusion</strong> is the joining of light nuclei (e.g. hydrogen) to form heavier ones, releasing more energy." },
+      { q: "What is radioactivity?", a: "<strong>Radioactivity</strong> is the spontaneous emission of radiation from the unstable nucleus of an atom. The three main types are alpha, beta, and gamma radiation." },
+      { q: "What is the difference between alpha, beta, and gamma radiation?", a: "<strong>Alpha</strong> particles (2 protons + 2 neutrons) are stopped by paper. <strong>Beta</strong> particles (fast electrons) are stopped by aluminium. <strong>Gamma</strong> rays (electromagnetic) require thick lead to block." },
+      { q: "What is the Doppler effect?", a: "The <strong>Doppler effect</strong> is the change in frequency of a wave (sound or light) perceived by an observer as the source and observer move relative to each other. A siren sounds higher pitched as it approaches." },
+      { q: "What is total internal reflection?", a: "<strong>Total internal reflection</strong> occurs when light hits a boundary between a denser and less dense medium at an angle greater than the critical angle, causing all light to reflect back into the denser medium." },
+      { q: "What is the critical angle?", a: "The <strong>critical angle</strong> is the angle of incidence above which total internal reflection occurs at the boundary between a denser and a less dense medium." },
+      { q: "What is an optical fibre?", a: "An <strong>optical fibre</strong> is a thin glass or plastic strand that transmits light using total internal reflection. Optical fibres are used in telecommunications and endoscopes." },
+      { q: "What is the difference between loudness and pitch of sound?", a: "<strong>Loudness</strong> depends on the amplitude of a sound wave; greater amplitude means louder sound. <strong>Pitch</strong> depends on frequency; higher frequency produces a higher pitch." },
+      { q: "What is ultrasound?", a: "<strong>Ultrasound</strong> is sound with a frequency above 20,000 Hz, beyond the range of human hearing. It is used in medical imaging (scanning), sonar, and cleaning equipment." },
+      { q: "What is the difference between a contact and a non-contact force?", a: "A <strong>contact force</strong> acts only when objects physically touch (e.g. friction, normal force). A <strong>non-contact force</strong> acts over a distance without touching (e.g. gravity, magnetism, electrostatic force)." },
+      { q: "What is the normal reaction force?", a: "The <strong>normal reaction force</strong> is the perpendicular force exerted by a surface on an object resting on it. It acts upward and balances the object's weight on a horizontal surface." },
+      { q: "What is equilibrium?", a: "An object is in <strong>equilibrium</strong> when all forces acting on it are balanced and there is no resultant force, so it remains at rest or moves at constant velocity." },
+      { q: "What is a resultant force?", a: "The <strong>resultant force</strong> is the single force that has the same effect as all the individual forces acting on an object combined. It determines whether the object accelerates." },
+      { q: "What is circular motion?", a: "<strong>Circular motion</strong> is the motion of an object moving along a circular path. It requires a centripetal force directed toward the centre of the circle to maintain the curved path." },
+      { q: "What is centripetal force?", a: "<strong>Centripetal force</strong> is the net inward force that keeps an object moving in a circular path. Without it, the object would move in a straight line (Newton's First Law)." },
+      { q: "What is the relationship between force, pressure, and area?", a: "<strong>Pressure = Force / Area</strong>. Increasing the area over which a force is spread reduces pressure. This is why snowshoes distribute weight to prevent sinking into snow." },
+      { q: "What is the principle of conservation of charge?", a: "The total electric <strong>charge</strong> in a closed system is conserved. Charge can be transferred between objects but cannot be created or destroyed." },
+      { q: "What is a semiconductor?", a: "A <strong>semiconductor</strong> is a material whose electrical conductivity lies between that of a conductor and an insulator. Silicon and germanium are common examples used in electronic components." },
+      { q: "What is the difference between AC and DC current?", a: "<strong>Direct current (DC)</strong> flows in one direction only (e.g. from a battery). <strong>Alternating current (AC)</strong> periodically reverses direction (e.g. household mains electricity)." },
+      { q: "What is the function of a fuse in a circuit?", a: "A <strong>fuse</strong> is a safety device containing a thin wire that melts and breaks the circuit if the current exceeds a safe level, protecting the circuit from overheating and fire." },
+      { q: "What is the difference between luminous and non-luminous objects?", a: "A <strong>luminous object</strong> produces its own light (e.g. the Sun, a flame, an LED). A <strong>non-luminous object</strong> is visible only because it reflects light from a luminous source." },
+    ]
+  }
+};
+
+let subject = 'bio';
+let index = 0;
+let flipped = false;
+let correct = 0;
+let total = 0;
+let marked = [];
+
+function setAccent(s) {
+  const root = document.documentElement;
+  const map = {
+    bio:  { a: 'var(--bio)',  d: 'var(--bio-dim)',  g: 'var(--bio-glow)' },
+    chem: { a: 'var(--chem)', d: 'var(--chem-dim)', g: 'var(--chem-glow)' },
+    phy:  { a: 'var(--phy)',  d: 'var(--phy-dim)',  g: 'var(--phy-glow)' },
+  };
+  root.style.setProperty('--accent',     map[s].a);
+  root.style.setProperty('--accent-dim', map[s].d);
+  root.style.setProperty('--accent-glow',map[s].g);
+}
+
+function switchSubject(s) {
+  subject = s;
+  index = 0;
+  flipped = false;
+  correct = 0;
+  total = 0;
+  marked = [];
+  setAccent(s);
+
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.subject === s));
+  document.getElementById('header-subject').textContent = data[s].label;
+  document.getElementById('completion').classList.remove('visible');
+  document.getElementById('card-stage').style.display = '';
+  document.getElementById('mark-controls').style.display = 'none';
+
+  renderCard();
+}
+
+function renderCard() {
+  const deck = data[subject].cards;
+  const card = deck[index];
+  const cardInner = document.getElementById('card-inner');
+
+  cardInner.classList.remove('flipped', 'card-anim');
+  void cardInner.offsetWidth;
+  cardInner.classList.add('card-anim');
+
+  flipped = false;
+  document.getElementById('mark-controls').style.display = 'none';
+
+  document.getElementById('card-tag-front').textContent = data[subject].label;
+  document.getElementById('card-question').textContent = card.q;
+  document.getElementById('card-answer').innerHTML = card.a;
+
+  // Progress
+  const total_cards = deck.length;
+  document.getElementById('card-num').textContent =
+    String(index + 1).padStart(2, '0') + ' / ' + String(total_cards).padStart(2, '0');
+  document.getElementById('progress-bar').style.width = ((index + 1) / total_cards * 100) + '%';
+
+  // Score
+  document.getElementById('score-text').textContent = 'Score: ' + correct;
+  document.getElementById('correct-count').textContent = correct;
+  document.getElementById('total-count').textContent = total_cards;
+
+  // Nav buttons
+  document.getElementById('btn-prev').disabled = index === 0;
+  document.getElementById('btn-next').disabled = index === total_cards - 1;
+}
+
+function flipCard() {
+  const cardInner = document.getElementById('card-inner');
+  flipped = !flipped;
+  cardInner.classList.toggle('flipped', flipped);
+
+  if (flipped && !marked[index]) {
+    document.getElementById('mark-controls').style.display = 'flex';
+  } else {
+    document.getElementById('mark-controls').style.display = 'none';
+  }
+}
+
+function markCard(isCorrect) {
+  if (marked[index]) return;
+  marked[index] = true;
+  total++;
+  if (isCorrect) correct++;
+  document.getElementById('mark-controls').style.display = 'none';
+  document.getElementById('score-text').textContent = 'Score: ' + correct;
+  document.getElementById('correct-count').textContent = correct;
+
+  const deck = data[subject].cards;
+  if (index < deck.length - 1) {
+    setTimeout(() => navigate(1), 320);
+  } else {
+    setTimeout(showCompletion, 400);
+  }
+}
+
+function navigate(dir) {
+  const deck = data[subject].cards;
+  index = Math.max(0, Math.min(deck.length - 1, index + dir));
+  renderCard();
+}
+
+function showCompletion() {
+  document.getElementById('card-stage').style.display = 'none';
+  document.getElementById('mark-controls').style.display = 'none';
+  const deck = data[subject].cards;
+  const pct = Math.round(correct / deck.length * 100);
+  document.getElementById('final-score').textContent = pct + '%';
+  document.getElementById('final-msg').textContent =
+    pct === 100 ? 'Perfect score. Outstanding work.' :
+    pct >= 70  ? 'Great effort. Review the missed cards and try again.' :
+                 'Keep practicing. Consistency is the key to mastery.';
+  document.getElementById('completion').classList.add('visible');
+}
+
+function restart() {
+  switchSubject(subject);
+}
+
+// Init
+setAccent('bio');
+renderCard();
+</script>
+</body>
+</html>
